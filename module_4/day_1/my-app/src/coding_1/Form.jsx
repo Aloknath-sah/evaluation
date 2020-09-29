@@ -1,5 +1,6 @@
 import React from 'react'
 import axios from 'axios'
+import Todo from './Todo'
 
 class Form extends React.Component{
     constructor(props){
@@ -7,33 +8,58 @@ class Form extends React.Component{
         this.state={
             password:"",
             email:"",
-            data:[],
+            datas:[],
+            token:""
         }
     }
 
     handleSubmit = (e)=>{
         e.preventDefault()
         const {password,email} =this.state
-        let item={
+        console.log(password,email)
+        var body = {
             password:password,
             email:email,
         }
-        this.setState({
-            data:[...this.state.data,item]
+        
+        axios({
+            method: 'post',
+            url: 'https://reqres.in/api/register',
+            data: body
         })
+        .then((response)=> {
+            console.log(response);
+            this.setState({
+                token:response.data.token
+            })
+            console.log(response);
+        })
+        .catch( (error) =>{
+            console.log(error);
+        });
+        
 
-        console.log(password,email)
-        
-        axios.post("https://reqres.in/api/register")
-        .then( (res)=>console.log(res))
-        
-        .catch(err=>console.error(err))
+        axios({
+            method: 'get',
+            url: 'https://jsonplaceholder.typicode.com/todos',
+            
+        })
+        .then((response)=> {
+            console.log(response.data);
+            this.setState({
+                datas:response.data
+            })
+        })
+        .catch( (error) =>{
+            console.log(error);
+        });
         
         // console.log(this.data.item)
-        
         //console.log(e)
+        console.log(this.state.datas)
         
     }
+    
 
     handleChange = (e) => {
         const {name,value} = e.target
@@ -45,21 +71,13 @@ class Form extends React.Component{
         
     }
 
-    // handleAddToData=(index)=>{
-    //     this.setState({
-    //         data:[...this.state.data,item]
-    //     })
-    // }
-    // handleButton=(e)=>{
-    //     console.log(e.target.parentElement)
-    //     let del = e.target.parentElement
-    //     del.remove()
-
-    // }
-
     render(){
-        
+        console.log(this.state.token)
+        console.log(this.state.datas)
+        const {datas} = this.state
         return(
+            <>
+            
             <div style={{height:"200px",width:"300px",border:"1px solid black",margin:"auto"}}>
                 <h3>Login/Register</h3>
             <form onSubmit={this.handleSubmit} >
@@ -91,15 +109,17 @@ class Form extends React.Component{
                     />
                 </div>
             </form>
-            {/* <div>{this.state.data.map((item) =>(
-                <div key={uuidv4()} style={{display:"flex"}}>
-                    <h3 style={{margin:"20px"}}>{item.password}</h3>
-                    <h3 style={{margin:"20px"}}>{item.email}</h3>
-                    <button onClick={this.handleButton}>delete</button>
-                </div>
-            ))}
-            </div> */}
+        
             </div>
+            <div style={{border:"1px solid black",margin:"auto",width:"600px"}}>{this.state.email}</div>
+            <div style={{border:"1px solid black",margin:"auto",width:"600px"}}>
+            {this.state.token}
+            </div>
+
+            <div style={{margin:"10px"}}>
+                {datas.map((item)=><Todo data={item} key={item.id} />)}
+            </div>
+            </>
         )
     }
 }
